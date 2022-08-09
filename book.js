@@ -1,5 +1,3 @@
-
-
 const mongoose = require('mongoose');
 const schema = require('./module/schemamodule')
 const bookModel = mongoose.model('bookModel', schema);
