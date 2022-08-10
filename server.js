@@ -7,9 +7,12 @@ const mongoose = require('mongoose');
 const app = express();
 const getbook = require('./book')
 const schema = require('./module/schemamodule')
-mongoose.connect('mongodb://127.0.0.1:27017/Books');
+mongoose.connect('mongodb+srv://hasan:hasan@cluster0.wsn6jhv.mongodb.net/?retryWrites=true&w=majority',{ useUnifiedTopology: true });
+
+const bookModel = mongoose.model('bookModel', schema);
 
 app.use(cors());
+app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
@@ -19,31 +22,49 @@ app.get('/', (request, response) => {
 
 })
 app.get('/book',getbook);
+app.post('/book',createNewBook);
+app.delete('/book/:id',deleteBook);
+app.put('/book/:id',updateBook);
 
 
-const bookModel = mongoose.model('bookModel', schema);
 
-const book1 = new bookModel({
-  title: 'calc',
-  description: 'maths',
-  status: false
-});
+function updateBook(req,res) {
+ // console.log(req.params.id)
+  const id = req.params.id;
+  const {data }= req.body;
+  bookModel.findByIdAndUpdate(id,data , {new : true}).then((rec)=>{
+    res.status(201).send(rec);
+  }).catch(error =>{
+    res.status(501).send(error);
+  })
 
-const book2 = new bookModel({
-  title: 'c++',
-  description: 'programming',
-  status: true
-});
 
-const book3 = new bookModel({
-  title: 'React',
-  description: 'SPA',
-  status: false
-});
+}
+function deleteBook(req,res) {
+  console.log(req.params.id)
 
-// book1.save();
-// book2.save();
-// book3.save();
+  bookModel.findByIdAndDelete(req.params.id).then((rec)=>{
+    res.status(201).send(rec);
+  }).catch(error =>{
+    res.status(501).send(error);
+  })
+
+
+}
+
+function createNewBook(req,res) {
+  const data = req.body;
+  const book = new bookModel(data);
+  console.log(data)
+  try {
+    book.save();
+  res.status(201).send(book);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+}
+
+
 
 
 
